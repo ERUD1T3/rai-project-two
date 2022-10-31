@@ -23,7 +23,7 @@ def fixHead(proxy):
 
 def move(proxy):
     X = 0.0
-    Y = 0.5
+    Y = 0.3
     Theta = 0.0
     Frequency = 0.0 # low speed
     proxy.setWalkTargetVelocity(X, Y, Theta, Frequency)
@@ -48,7 +48,8 @@ def main(robotIP):
     # Set NAO in stiffness On
     StiffnessOn(motionProxy)
     # Send NAO to Pose Init
-    postureProxy.goToPosture("Stand", 0.8)
+    # postureProxy.goToPosture("Stand", 1.0)
+    postureProxy.goToPosture("Crouch", 1.0)
     # enable arms control by move algorithm
     # motionProxy.setWalkArmsEnabled(True, True)
     # foot contact protection
