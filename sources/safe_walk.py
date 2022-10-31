@@ -1,7 +1,9 @@
 from calendar import month
+import imp
 from naoqi import ALProxy
 from nao_conf import *
 from rai_say import say
+import time
 
 
 def StiffnessOn(proxy):
@@ -21,7 +23,7 @@ def fixHead(proxy):
     fractionMaxSpeed  = 0.2
     proxy.setAngles(names, angles, fractionMaxSpeed)
 
-def move(proxy):
+def move(proxy, vX=0.1, vY=0.0, vTheta=0.0):
     vX = 0.0
     vY = 0.25
     Theta = 0.0
@@ -57,7 +59,13 @@ def main(robotIP):
     fixHead(motionProxy)
 
     # 30 second window
-    for _ in range(10): move(motionProxy)
+    for _ in range(1): 
+        move(motionProxy, 0.0, 0.25, 0.0)
+        time.sleep(3)
+        move(motionProxy, .25, 0.0, 0.0)
+        time.sleep(3)
+        move(motionProxy, 0.0, -0.25, 0.0)
+
 
 
 
