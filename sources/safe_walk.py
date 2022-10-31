@@ -48,7 +48,7 @@ def main(robotIP):
     # Set NAO in stiffness On
     StiffnessOn(motionProxy)
     # Send NAO to Pose Init
-    postureProxy.goToPosture("StandInit", 0.5)
+    postureProxy.goToPosture("Stand", 0.8)
     # enable arms control by move algorithm
     # motionProxy.setWalkArmsEnabled(True, True)
     # foot contact protection
