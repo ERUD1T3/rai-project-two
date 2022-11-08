@@ -2,6 +2,7 @@ from naoqi import ALProxy
 from nao_conf import *
 from rai_say import say
 import time
+import keyboard
 
 from matplotlib.figure import figaspect
 import almath as m # python's wrapping of almath
@@ -93,6 +94,7 @@ def main(robotIP):
     z_array = [] # distance to wall
     t_arr = []  # time array
     a_array = []  # actions 
+    door_array = []
 
     time_start = time.time()
     time_now = 0 
@@ -137,7 +139,12 @@ def main(robotIP):
             move(motionProxy, 0.0, 0.2, 0.0)
             time.sleep(0.05)
 
+        if keyboard.read_key() == "d":
+            door_array.append(True)
+            print("Door detected.")
 
+        else:
+            door_array.append(False)
                 # get robot position after move
         endRobotPosition = m.Pose2D(motionProxy.getRobotPosition(False))
         robotMove = m.pose2DInverse(initRobotPosition)*endRobotPosition
