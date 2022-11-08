@@ -2,8 +2,9 @@ from naoqi import ALProxy
 from nao_conf import *
 from rai_say import say
 import time
+#import pygame
 import keyboard
-
+import msvcrt
 from matplotlib.figure import figaspect
 import almath as m # python's wrapping of almath
 import sys
@@ -12,14 +13,14 @@ from rai_sonar import read_sonar, savitzky_golay
 import csv
 import numpy as np
 
-def write_to_csv(time_arr, x_array, z_array, a_array):
+def write_to_csv(time_arr, x_array, z_array, a_array, d_array):
     '''
     Write the data to a csv file
     '''
     filename = '../data/sonar_data_{}.csv'.format(time.time())
     with open(filename, 'w') as csvfile:
         # write the header
-        fieldnames = ['t', 'x', 'z', 'a']
+        fieldnames = ['t', 'x', 'z', 'a', 'd']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         # write the data
@@ -29,6 +30,7 @@ def write_to_csv(time_arr, x_array, z_array, a_array):
                 'x': x_array[i], 
                 'z': z_array[i], 
                 'a': a_array[i], 
+                'd': d_array[i]
             })
         
 
@@ -53,7 +55,7 @@ def move(proxy, vX=0.1, vY=0.0, vTheta=0.0):
     vX = vX
     vY = vY
     Theta = vTheta
-    Frequency = 0.0 # low speed
+    Frequency = 0.4 # low speed
     proxy.setWalkTargetVelocity(vX, vY, Theta, Frequency)
 
 def main(robotIP):
@@ -100,7 +102,7 @@ def main(robotIP):
     time_now = 0 
 
     # 30 second window
-    while time_now < 30:
+    while time_now < 100:
         # read sonar data
         sonar_readings = read_sonar(20)
         time_now = time.time() - time_start
@@ -108,28 +110,32 @@ def main(robotIP):
         z_array.append(sonar_readings)
 
         # filter the data
-        filtered_y = savitzky_golay(np.array(x_array), window_size=31, order=4)
+        filtered_y = savitzky_golay(np.array(z_array), window_size=31, order=4)
         sonar_readings = filtered_y[-1]
 
         # print sonar_readings
         print(sonar_readings)
         
-        if sonar_readings < .35:
+        if sonar_readings < .30:
             # move away from the wall
             # motionProxy.post.move(0, 0.1, 0)
             #motionProxy.post.move(-.2, 0, wTheta)
             a_array.append('backward')
-            move(motionProxy, -0.2, 0.0, 0.0)
+            for _ in range(10):
+                move(motionProxy, -0.2, 0.0, 0.0)
+            time.sleep(0.05)
             move(motionProxy, 0.0, 0.2, 0.0)
             
         
             time.sleep(0.05)
-        elif sonar_readings > .65:
+        elif sonar_readings > .5:
             # move towards the wall
             # motionProxy.post.move(0, -0.1, 0)
             #motionProxy.post.move(.2, 0, wTheta)
             a_array.append('forward')
-            move(motionProxy, 0.2, 0.0, 0.0)
+            for _ in range(10):
+                move(motionProxy, 0.2, 0.0, 0.0)
+            time.sleep(0.05)
             move(motionProxy, 0.0, 0.2, 0.0)
             
             time.sleep(0.05)
@@ -139,13 +145,16 @@ def main(robotIP):
             move(motionProxy, 0.0, 0.2, 0.0)
             time.sleep(0.05)
 
-        if keyboard.read_key() == "d":
+        #keys=pygame.key.get_pressed()
+        if msvcrt.kbhit():
             door_array.append(True)
             print("Door detected.")
-
+            msvcrt.getch() 
         else:
+            print("NO Door")
             door_array.append(False)
-                # get robot position after move
+        #        get robot position after move
+        print(time_now)
         endRobotPosition = m.Pose2D(motionProxy.getRobotPosition(False))
         robotMove = m.pose2DInverse(initRobotPosition)*endRobotPosition
         x_array.append([robotMove.x, robotMove.y])
@@ -155,8 +164,8 @@ def main(robotIP):
     motionProxy.post.stopMove()
 
     # write the data to a csv file
-    filtered_y = savitzky_golay(np.array(x_array), window_size=31, order=4)
-    write_to_csv(t_arr, x_array, z_array, a_array)
+    filtered_y = savitzky_golay(np.array(z_array), window_size=31, order=4)
+    write_to_csv(t_arr, x_array, z_array, a_array, door_array)
 
     # plot the sonar readings, and the robot's position in subplot
     fig, ax1 = plt.subplots()
