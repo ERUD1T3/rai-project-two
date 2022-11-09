@@ -3,7 +3,7 @@ from nao_conf import *
 from rai_say import say
 import time
 #import pygame
-import keyboard
+#import keyboard
 import msvcrt
 from matplotlib.figure import figaspect
 import almath as m # python's wrapping of almath
@@ -121,7 +121,7 @@ def main(robotIP):
             # motionProxy.post.move(0, 0.1, 0)
             #motionProxy.post.move(-.2, 0, wTheta)
             a_array.append('backward')
-            for _ in range(10):
+            for _ in range(20):
                 move(motionProxy, -0.2, 0.0, 0.0)
             time.sleep(0.05)
             move(motionProxy, 0.0, 0.2, 0.0)
@@ -133,7 +133,7 @@ def main(robotIP):
             # motionProxy.post.move(0, -0.1, 0)
             #motionProxy.post.move(.2, 0, wTheta)
             a_array.append('forward')
-            for _ in range(10):
+            for _ in range(20):
                 move(motionProxy, 0.2, 0.0, 0.0)
             time.sleep(0.05)
             move(motionProxy, 0.0, 0.2, 0.0)
