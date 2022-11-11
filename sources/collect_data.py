@@ -3,7 +3,7 @@ from nao_conf import *
 from rai_say import say
 import time
 #import pygame
-#import keyboard
+import keyboard
 import msvcrt
 from matplotlib.figure import figaspect
 import almath as m # python's wrapping of almath
@@ -100,6 +100,7 @@ def main(robotIP):
 
     time_start = time.time()
     time_now = 0 
+    by_door = False
 
     # 30 second window
     while time_now < 100:
@@ -146,10 +147,15 @@ def main(robotIP):
             time.sleep(0.05)
 
         #keys=pygame.key.get_pressed()
-        if msvcrt.kbhit():
+        if keyboard.is_pressed('d'):
+            if by_door == False:
+                by_door = True
+            else:
+                by_door = False
+        if by_door:
             door_array.append(True)
             print("Door detected.")
-            msvcrt.getch() 
+            #msvcrt.getch() 
         else:
             print("NO Door")
             door_array.append(False)
