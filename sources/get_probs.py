@@ -2,7 +2,7 @@
 import csv
 
 # read the data from the csv file
-def read_from_csv(path, n_samples=60):
+def read_from_csv(path, n_samples=150):
     time_arr = []
     x_array = []
     z_array = []
