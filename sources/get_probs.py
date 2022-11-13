@@ -49,10 +49,18 @@ def compute_prob(array, cardinality=2):
     # computer probabilities based on count
     # get the number of times true appears in the array
     if len(array) == 0: return 0
-    count = 0.0
-    for x in array:
-        if x: count += 1
-    return count/len(x_array)
+
+    if cardinality == 2:
+        count = 0.0
+        for x in array:
+            if x: count += 1
+        return 1 - count/len(array), count/len(array)
+
+    if cardinality == 3:
+        count = [0.0, 0.0, 0.0]
+        for x in array:
+            count[x] += 1
+        return count[0]/len(array), count[1]/len(array), count[2]/len(array)
 
 # generate cpts based on samples
 def generate_cpts(samples):
@@ -67,11 +75,13 @@ def generate_cpts(samples):
     num_samples = len(samples)
     print("number of samples: {}".format( num_samples))
     # get the number of time steps
-    num_time_steps = len(samples[0][0])
-    print("number of time steps: {}".format( num_time_steps))
+    # num_time_steps = len(samples[0][0])
+    # print("number of time steps: {}".format(num_time_steps))
     # get the number of variables
     num_vars = len(samples[0])
     print("number of variables: {}".format( num_vars))
+    # number of time steps 
+    num_time_steps = 170
 
     # find probabilities for each variable at the given time step
     z_cpts = {}
@@ -81,31 +91,31 @@ def generate_cpts(samples):
     # print the samples
     print(samples)
 
+    # for first timestep
+    # z_cpts['z0'] = compute_prob([x[0] for x in samples[0]])
+
     # get z cpts
     # for each time step
     for t in range(num_time_steps):
         # for each variable skip the first one
-        var = 1
+        var = 2 # z
         # get the array of values for the variable at the given time step
-        x_array = []
+        array = []
         for sample in samples:
-            # print length of sample
-            # print(len(sample))
-            # print(len(sample[0]))
-            # print var and t
-            # print("var: {}".format( var))
-            # print("t: {}".format( t))
-            # print sample at var and t
-            # print("sample at {}{} =  {}".format(var, t, sample[var][t]))
-            x_array.append(sample[var][t])
+            # add the value of the variable at the given time step
+            try:
+                array.append(sample[var][t])
+            except:
+                continue
+
+            
         # get the probabilities of the sonar readings based on the check function
-        bools = x_array
-        print(bools)
+        print(array)
+        if len(array) == 0: break # break if there are no samples at this time step
         # computer probabilities based on count
-        prob = compute_prob(bools)
+        false_p, true_p = compute_prob(array, cardinality=2)
         # add the probability to the cpts
-        
-        z_cpts[f'z_{t}'] = prob
+        z_cpts[f'z{t}'] = (false_p, true_p)
         # print cpt with 3 decimal places
         # print("cpt[('z', {})] = {:.3f}".format(t, prob))
             
@@ -113,7 +123,7 @@ def generate_cpts(samples):
     # for each time step  
     for t in range(num_time_steps):
         # for each variable skip the first one
-        var = 2
+        var = 3 # a
         # get the array of values for the variable at the given time step
         z_true_array = []
         z_false_array = []
@@ -128,8 +138,8 @@ def generate_cpts(samples):
         prob_true = compute_prob(z_true_array)
         prob_false = compute_prob(z_false_array)
         # add the probability to the cpts
-        a_cpts[f'a_{t}|z=True'] = prob_true
-        a_cpts[f'a_{t}|z=False'] = prob_false
+        a_cpts[f'a{t}|z=True'] = prob_true
+        a_cpts[f'a{t}|z=False'] = prob_false
 
     # get d cpts depending on a
     # for each time step
