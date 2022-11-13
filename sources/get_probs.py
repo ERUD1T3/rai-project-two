@@ -4,6 +4,7 @@ import csv
 # read the data from the csv file
 def read_from_csv(path, n_samples=60):
     time_arr = []
+    x_array = []
     z_array = []
     a_array = []
     d_array = []
