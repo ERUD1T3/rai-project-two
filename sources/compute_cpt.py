@@ -3,26 +3,26 @@ from get_probs import read_from_csv, generate_cpts
 import os
 
 def main():
-
+    path = '../data/samples/'
     # read all files in the directory
     try:
-        files = os.listdir('../../data/samples/')
+        files = os.listdir(path)
     except:
-        print("Could not find directory, try to navigate to sources/test_files before running this script")
+        print("Could not find directory, try to navigate to sources/ before running this script")
         return
     print(files)
     # read the data from the csv file
     samples = []
     for file in files:
         # read the data
-        time_arr, z_array, a_array, d_array = read_from_csv('../../data/samples/' + file)
+        time_arr, x_array, z_array, a_array, d_array = read_from_csv(path + file)
         # append the data to the samples
-        samples.append([time_arr, z_array, a_array, d_array])
+        samples.append([time_arr, x_array, z_array, a_array, d_array])
     
-    print(len(samples))
-    print(len(samples[0]))
-    print(len(samples[0][0]))
-    print(samples[0][0][0])
+    print(len(samples)) # number of samples
+    print(len(samples[0])) # number of variables
+    print(len(samples[0][0])) # number of time steps
+    print(samples[0][1][0]) #
 
     # generate cpts
     z_cpts, a_cpts, d_cpts = generate_cpts(samples)

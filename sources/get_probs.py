@@ -8,6 +8,8 @@ def read_from_csv(path, n_samples=150):
     z_array = []
     a_array = []
     d_array = []
+    time_counter = 0
+    threshold_with_offset = 0.3
     with open(path, 'r') as csvfile:
         plots = csv.reader(csvfile, delimiter=',')
         # skip the first line
@@ -15,30 +17,40 @@ def read_from_csv(path, n_samples=150):
         # read the data and stop at n_samples
         for row in plots:
             # print(row)
-            
             # get the time
-            time_arr.append(True if row[0] == 'True' else False)
-            # get the sonar reading
-            z_array.append(True if row[1] == 'True' else False)
-            # get the sonar reading
-            a_array.append(True if row[2] == 'True' else False)
+            time_arr.append(time_counter)
+            time_counter += 1
+            # parse the row from list string to tuple
+            x = row[1].strip('[]').split(',')
+            x_array.append((float(x[0]), float(x[1])))
+            # get the sonar readings
+            z = float(row[2]) < threshold_with_offset
+            z_array.append(z)
+            # get the action
+            a = None
+            if row[3] == 'backward':
+                a = 0
+            elif row[3] == 'forward':
+                a = 1
+            else: # stay 
+                a = 2
+            a_array.append(a)
             # get the door reading
-            d_array.append(True if row[3] == 'True' else False)
+            d_array.append(row[4] == 'True')
 
             # check if we have read enough samples
-            if len(time_arr) >= n_samples:
-                break
+            # if len(time_arr) >= n_samples:
+            #     break
 
-    return time_arr, z_array, a_array, d_array
+    return time_arr, x_array, z_array, a_array, d_array
 
 # compute probability
-def compute_prob(x_array):
+def compute_prob(array, cardinality=2):
     # computer probabilities based on count
     # get the number of times true appears in the array
-    if len(x_array) == 0:
-        return 0
+    if len(array) == 0: return 0
     count = 0.0
-    for x in x_array:
+    for x in array:
         if x: count += 1
     return count/len(x_array)
 
