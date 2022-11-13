@@ -33,19 +33,19 @@ def main():
     print("d_cpts: {}".format(d_cpts))
 
     # write the z_cpts to a file
-    with open('../../data/cpts/z_cpts.txt', 'w') as f:
+    with open('../data/cpts/z_cpts.txt', 'w') as f:
         # write the cpts key and values
         for cpt in z_cpts:
             f.write("{}: {}\n".format(cpt, z_cpts[cpt]))
 
     # write the a_cpts to a file
-    with open('../../data/cpts/a_cpts.txt', 'w') as f:
+    with open('../data/cpts/a_cpts.txt', 'w') as f:
         # write the lines and their probabilities
         for cpt in a_cpts:
             f.write("{}: {}\n".format(cpt, a_cpts[cpt]))
 
     # write the d_cpts to a file
-    with open('../../data/cpts/d_cpts.txt', 'w') as f:
+    with open('../data/cpts/d_cpts.txt', 'w') as f:
         # write the lines and their probabilities
         for cpt in d_cpts:
             f.write("{}: {}\n".format(cpt, d_cpts[cpt]))

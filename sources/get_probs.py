@@ -143,17 +143,55 @@ def generate_cpts(samples):
                     z_false_array.append(sample[var][t])
         
             # get the probabilities 
-            not_prob_true, prob_true = compute_prob(z_true_array, cardinality=3)
-            not_prob_false, prob_false = compute_prob(z_false_array, cardinality=3)
+            a0_ztrue, a1_ztrue, a2_ztrue = compute_prob(z_true_array, cardinality=3)
+            a0_zfalse, a1_zfalse, a3_zfalse = compute_prob(z_false_array, cardinality=3)
             # add the probability to the cpts
-            a_cpts[f'a{t}|z{t}=True'] = (not_prob_true, prob_true)
-            a_cpts[f'a{t}|z{t}=False'] = (not_prob_false, prob_false)
+            a_cpts[f'a{t}|z{t}=True'] = (a0_ztrue, a1_ztrue, a2_ztrue)
+            a_cpts[f'a{t}|z{t}=False'] = (a0_zfalse, a1_zfalse, a3_zfalse)
         else:
             # for each variable skip the first one
             var = 3
             # get the array of values for the variable at the given time step
-            z_true_array = []
-            z_false_array = []
+            zt_true_ztm1_true_array = []
+            zt_true_ztm1_false_array = []
+            zt_false_ztm1_true_array = []
+            zt_false_ztm1_false_array = []
+            for sample in samples:
+                try:
+                    # count the number of times the sonar reading is true
+                    if sample[2][t] and sample[2][t-1]:
+                        zt_true_ztm1_true_array.append(sample[var][t])
+                    elif sample[2][t] and not sample[2][t-1]:
+                        zt_true_ztm1_false_array.append(sample[var][t])
+                    elif not sample[2][t] and sample[2][t-1]:
+                        zt_false_ztm1_true_array.append(sample[var][t])
+                    else:
+                        zt_false_ztm1_false_array.append(sample[var][t])
+                except:
+                    continue
+
+            # get the probabilities
+            if len(zt_true_ztm1_true_array) == 0 and \
+                len(zt_true_ztm1_false_array) == 0 and \
+                len(zt_false_ztm1_true_array) == 0 and \
+                len(zt_false_ztm1_false_array) == 0:
+                break
+
+            a0_zttrue_ztm1true, a1_zttrue_ztm1true, a2_zttrue_ztm1true = compute_prob(
+                zt_true_ztm1_true_array, cardinality=3)
+            a0_zttrue_ztm1false, a1_zttrue_ztm1false, a2_zttrue_ztm1false = compute_prob(
+                zt_true_ztm1_false_array, cardinality=3)
+            a0_ztfalse_ztm1true, a1_ztfalse_ztm1true, a2_ztfalse_ztm1true = compute_prob(
+                zt_false_ztm1_true_array, cardinality=3)
+            a0_ztfalse_ztm1false, a1_ztfalse_ztm1false, a2_ztfalse_ztm1false = compute_prob(
+                zt_false_ztm1_false_array, cardinality=3)
+
+            # add the probability to the cpts
+            a_cpts[f'a{t}|z{t}=True,z{t-1}=True'] = (a0_zttrue_ztm1true, a1_zttrue_ztm1true, a2_zttrue_ztm1true)
+            a_cpts[f'a{t}|z{t}=True,z{t-1}=False'] = (a0_zttrue_ztm1false, a1_zttrue_ztm1false, a2_zttrue_ztm1false)
+            a_cpts[f'a{t}|z{t}=False,z{t-1}=True'] = (a0_ztfalse_ztm1true, a1_ztfalse_ztm1true, a2_ztfalse_ztm1true)
+            a_cpts[f'a{t}|z{t}=False,z{t-1}=False'] = (a0_ztfalse_ztm1false, a1_ztfalse_ztm1false, a2_ztfalse_ztm1false)
+
 
 
     # get d cpts depending on a
