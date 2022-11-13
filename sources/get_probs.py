@@ -48,7 +48,13 @@ def read_from_csv(path, n_samples=150):
 def compute_prob(array, cardinality=2):
     # computer probabilities based on count
     # get the number of times true appears in the array
-    if len(array) == 0: return 0
+    if len(array) == 0: 
+        if cardinality == 2:
+            return 0.5, 0.5
+        elif cardinality == 3:
+            return 0.33, 0.33, 0.33
+        else:
+            return None
 
     if cardinality == 2:
         count = 0.0
@@ -122,46 +128,134 @@ def generate_cpts(samples):
     # get a cpts depending on z
     # for each time step  
     for t in range(num_time_steps):
-        # for each variable skip the first one
-        var = 3 # a
-        # get the array of values for the variable at the given time step
-        z_true_array = []
-        z_false_array = []
-        for sample in samples:
-            # count the number of times the sonar reading is true
-            if sample[1][t]:
-                z_true_array.append(sample[var][t])
-            else:
-                z_false_array.append(sample[var][t])
-    
-        # get the probabilities for the sonar readings true and false
-        prob_true = compute_prob(z_true_array)
-        prob_false = compute_prob(z_false_array)
-        # add the probability to the cpts
-        a_cpts[f'a{t}|z=True'] = prob_true
-        a_cpts[f'a{t}|z=False'] = prob_false
+        # for the first timestep
+        if t == 0:
+            # for each variable skip the first one
+            var = 3 # a
+            # get the array of values for the variable at the given time step
+            z_true_array = []
+            z_false_array = []
+            for sample in samples:
+                # count the number of times the sonar reading is true
+                if sample[2][t]:
+                    z_true_array.append(sample[var][t])
+                else:
+                    z_false_array.append(sample[var][t])
+        
+            # get the probabilities 
+            not_prob_true, prob_true = compute_prob(z_true_array, cardinality=3)
+            not_prob_false, prob_false = compute_prob(z_false_array, cardinality=3)
+            # add the probability to the cpts
+            a_cpts[f'a{t}|z{t}=True'] = (not_prob_true, prob_true)
+            a_cpts[f'a{t}|z{t}=False'] = (not_prob_false, prob_false)
+        else:
+            # for each variable skip the first one
+            var = 3
+            # get the array of values for the variable at the given time step
+            z_true_array = []
+            z_false_array = []
+
 
     # get d cpts depending on a
     # for each time step
     for t in range(num_time_steps):
-        var = 3
-        # get the array of values for the variable at the given time step
-        a_true_array = []
-        a_false_array = []
-        for sample in samples:
-            # count the number of times the sonar reading is true
-            if sample[2][t]:
-                a_true_array.append(sample[var][t])
-            else:
-                a_false_array.append(sample[var][t])
+        # for the first timestep
+        if t == 0:
+            # for each variable skip the first one
+            var = 4
+            # get the array of values for the variable at the given time step
+            a_0_array = []
+            a_1_array = []
+            a_2_array = []
+            for sample in samples:
+                # count the number of times the sonar reading is true
+                if sample[3][t] == 0:
+                    a_0_array.append(sample[var][t])
+                elif sample[3][t] == 1:
+                    a_1_array.append(sample[var][t])
+                else:
+                    a_2_array.append(sample[var][t])
 
-        # get the probabilities for the sonar readings true and false
-        prob_true = compute_prob(a_true_array)
-        prob_false = compute_prob(a_false_array)
-        # add the probability to the cpts
-        d_cpts[f'd_{t}|a=True'] = prob_true
-        d_cpts[f'd_{t}|a=False'] = prob_false
+            # get the probabilities 
+            not_prob_0, prob_0 = compute_prob(a_0_array, cardinality=2)
+            not_prob_1, prob_1 = compute_prob(a_1_array, cardinality=2)
+            not_prob_2, prob_2 = compute_prob(a_2_array, cardinality=2)
+            # add the probability to the cpts
+            d_cpts[f'd{t}|a{t}=0'] = (not_prob_0, prob_0)
+            d_cpts[f'd{t}|a{t}=1'] = (not_prob_1, prob_1)
+            d_cpts[f'd{t}|a{t}=2'] = (not_prob_2, prob_2)
+        else:
+            # for each variable skip the first one
+            var = 4
+            # get the array of values for the variable at the given time step
+            at_0_atm1_0_array = []
+            at_0_atm1_1_array = []
+            at_0_atm1_2_array = []
+            at_1_atm1_0_array = []
+            at_1_atm1_1_array = []
+            at_1_atm1_2_array = []
+            at_2_atm1_0_array = []
+            at_2_atm1_1_array = []
+            at_2_atm1_2_array = []
 
+            for sample in samples:
+                # count the number of times the sonar reading is true
+                try:
+                    if sample[3][t] == 0:
+                        if sample[3][t-1] == 0:
+                            at_0_atm1_0_array.append(sample[var][t])
+                        elif sample[3][t-1] == 1:
+                            at_0_atm1_1_array.append(sample[var][t])
+                        else:
+                            at_0_atm1_2_array.append(sample[var][t])
+                    elif sample[3][t] == 1:
+                        if sample[3][t-1] == 0:
+                            at_1_atm1_0_array.append(sample[var][t])
+                        elif sample[3][t-1] == 1:
+                            at_1_atm1_1_array.append(sample[var][t])
+                        else:
+                            at_1_atm1_2_array.append(sample[var][t])
+                    else:
+                        if sample[3][t-1] == 0:
+                            at_2_atm1_0_array.append(sample[var][t])
+                        elif sample[3][t-1] == 1:
+                            at_2_atm1_1_array.append(sample[var][t])
+                        else:
+                            at_2_atm1_2_array.append(sample[var][t])
+                except:
+                    continue
+
+            # get the probabilities
+            if len(at_0_atm1_0_array) == 0 and \
+                len(at_0_atm1_1_array) == 0 and \
+                len(at_0_atm1_2_array) == 0 and \
+                len(at_1_atm1_0_array) == 0 and \
+                len(at_1_atm1_1_array) == 0 and \
+                len(at_1_atm1_2_array) == 0 and \
+                len(at_2_atm1_0_array) == 0 and \
+                len(at_2_atm1_1_array) == 0 and \
+                len(at_2_atm1_2_array) == 0:
+                break
+
+            not_prob_0_0, prob_0_0 = compute_prob(at_0_atm1_0_array, cardinality=2)
+            not_prob_0_1, prob_0_1 = compute_prob(at_0_atm1_1_array, cardinality=2)
+            not_prob_0_2, prob_0_2 = compute_prob(at_0_atm1_2_array, cardinality=2)
+            not_prob_1_0, prob_1_0 = compute_prob(at_1_atm1_0_array, cardinality=2)
+            not_prob_1_1, prob_1_1 = compute_prob(at_1_atm1_1_array, cardinality=2)
+            not_prob_1_2, prob_1_2 = compute_prob(at_1_atm1_2_array, cardinality=2)
+            not_prob_2_0, prob_2_0 = compute_prob(at_2_atm1_0_array, cardinality=2)
+            not_prob_2_1, prob_2_1 = compute_prob(at_2_atm1_1_array, cardinality=2)
+            not_prob_2_2, prob_2_2 = compute_prob(at_2_atm1_2_array, cardinality=2)
+            # add the probability to the cpts
+            d_cpts[f'd{t}|a{t}=0,a{t-1}=0'] = (not_prob_0_0, prob_0_0)
+            d_cpts[f'd{t}|a{t}=0,a{t-1}=1'] = (not_prob_0_1, prob_0_1)
+            d_cpts[f'd{t}|a{t}=0,a{t-1}=2'] = (not_prob_0_2, prob_0_2)
+            d_cpts[f'd{t}|a{t}=1,a{t-1}=0'] = (not_prob_1_0, prob_1_0)
+            d_cpts[f'd{t}|a{t}=1,a{t-1}=1'] = (not_prob_1_1, prob_1_1)
+            d_cpts[f'd{t}|a{t}=1,a{t-1}=2'] = (not_prob_1_2, prob_1_2)
+            d_cpts[f'd{t}|a{t}=2,a{t-1}=0'] = (not_prob_2_0, prob_2_0)
+            d_cpts[f'd{t}|a{t}=2,a{t-1}=1'] = (not_prob_2_1, prob_2_1)
+            d_cpts[f'd{t}|a{t}=2,a{t-1}=2'] = (not_prob_2_2, prob_2_2)
     
 
     return z_cpts, a_cpts, d_cpts
