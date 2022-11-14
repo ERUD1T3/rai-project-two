@@ -17,7 +17,9 @@ import numpy as np
 from subprocess import call
 from hmmlearn import hmm
 
-
+def speak(text):
+    tts = ALProxy("ALTextToSpeech", IP, 9559)
+    tts.say(text)
 
 def StiffnessOn(proxy):
     # We use the "Body" name to signify the collection of all joints
@@ -47,10 +49,10 @@ def move(proxy, vX=0.1, vY=0.0, vTheta=0.0):
 def main(robotIP):
 
 
-    
+    door = False
     np.set_printoptions(formatter={'float_kind':'{:f}'.format})
     model = hmm.MultinomialHMM(n_components=2,  n_iter=1)
-    model.startprob_ = np.array([0.7, 0.3])
+    model.startprob_ = np.array([0.5, 0.5])
     model.n_features = 3
     model.transmat_ = np.array([[0.9940766550522648, 0.005923344947735192],[0.017857142857142856, 0.9821428571428571],
     ])
@@ -59,6 +61,9 @@ def main(robotIP):
     emission_probs = np.array([[0.1137, 0.5937, 0.0434],[0.0023, 0.0277, 0.2183],
                             ])
     model.emissionprob_=emission_probs
+
+    door_count = 0
+
 
 
     # Init proxies.
@@ -108,7 +113,7 @@ def main(robotIP):
 
 
     # 30 second window
-    while time_now < 100:
+    while time_now < 250:
         # read sonar data
         sonar_readings = read_sonar(20)
         time_now = time.time() - time_start
@@ -157,14 +162,34 @@ def main(robotIP):
 
 
         print(time_now)
-        print(a_l)
+        #print(a_l)
         action_arr = np.array(a_l)
-        print(model.score_samples(action_arr))
+        _, prob_arr = (model.score_samples(action_arr))
+        current_prob = prob_arr[-1]
+        door_prob = current_prob[-1]
+        print("Action:",a_array[-1])
+        print("door_prob:", door_prob)
+        if door_prob > 0.7:
+            print("Door")
+            door = True
+        else:
+            if door and door_prob < 0.005:
+                door_count +=1
+                door = False
+                speak("Passed Door"+ str(door_count))
+
+        print("Door count:",door_count)
         endRobotPosition = m.Pose2D(motionProxy.getRobotPosition(False))
         robotMove = m.pose2DInverse(initRobotPosition)*endRobotPosition
         x_array.append([robotMove.x, robotMove.y])
 
+        if door_count >=3:
+            break
 
+    if door_count >=3:
+        speak("I passed three doors")
+        time.sleep(10)
+        speak("Time to go back")
     # stop the robot
     motionProxy.post.stopMove()
 
