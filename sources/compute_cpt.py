@@ -27,6 +27,24 @@ def main():
     # generate cpts
     z_cpts, a_cpts, d_cpts = generate_cpts(samples)
 
+    # average across all timesteps
+    avg_z_cpts = {}
+    avg_a_cpts = {}
+    avg_d_cpts = {}
+
+    avg_z_cpts['z0'] = z_cpts['z0']
+    # for all the keys in the z_cpts skip the first one
+    false = 0.0
+    true = 0.0
+
+    for key in z_cpts.keys():
+        if key == 'z0':
+            continue
+        false += z_cpts[key][0]
+        true += z_cpts[key][1]
+        
+    avg_z_cpts['z1'] = (false/(len(z_cpts) - 1), true/len(z_cpts))
+
     # print the cpts
     print("z_cpts: {}".format(z_cpts))
     print("a_cpts: {}".format(a_cpts))

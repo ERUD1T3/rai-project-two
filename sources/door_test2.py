@@ -188,16 +188,74 @@ def main(robotIP):
 
     if door_count >=3:
         speak("I passed three doors")
-        time.sleep(10)
-        speak("Time to go back")
+        
+        time_start = time.time()
+        time_now = 0 
+        x_array = [] # x position of the robot
+        z_array = [] # distance to wall
+        t_arr = []  # time array
+        a_array = []  # actions 
+        door_array = []
 
-        endRobotPosition = m.Pose2D(motionProxy.getRobotPosition(False))
-        robotMove = m.pose2DInverse(initRobotPosition)*endRobotPosition
-        x_array.append([robotMove.x, robotMove.y])
+        while time_now < 100:
+            # read sonar data
+            sonar_readings = read_sonar(20)
+            time_now = time.time() - time_start
+            t_arr.append(time_now)
+            z_array.append(sonar_readings)
 
-        say("I'm back at the start!")
-    # stop the robot
-    motionProxy.post.stopMove()
+            # filter the data
+            filtered_y = savitzky_golay(np.array(z_array), window_size=31, order=4)
+            sonar_readings = filtered_y[-1]
+
+            # print sonar_readings
+            print(sonar_readings)
+            
+            if sonar_readings < .30:
+                # move away from the wall
+                # motionProxy.post.move(0, 0.1, 0)
+                #motionProxy.post.move(-.2, 0, wTheta)
+                a_array.append('backward')
+                for _ in range(20):
+                    move(motionProxy, -0.2, 0.0, 0.0)
+                time.sleep(0.05)
+                move(motionProxy, 0.0, -0.2, 0.0)
+                
+            
+                time.sleep(0.05)
+            elif sonar_readings > .5:
+                # move towards the wall
+                # motionProxy.post.move(0, -0.1, 0)
+                #motionProxy.post.move(.2, 0, wTheta)
+                a_array.append('forward')
+                for _ in range(20):
+                    move(motionProxy, 0.2, 0.0, 0.0)
+                time.sleep(0.05)
+                move(motionProxy, 0.0, -0.2, 0.0)
+                
+                time.sleep(0.05)
+            else:
+                # stay put
+                a_array.append('stay')
+                move(motionProxy, 0.0, -0.2, 0.0)
+                time.sleep(0.05)
+
+            # get robot position after move
+            print(time_now)
+            endRobotPosition = m.Pose2D(motionProxy.getRobotPosition(False))
+            robotMove = m.pose2DInverse(initRobotPosition)*endRobotPosition
+            x_array.append([robotMove.x, robotMove.y])
+
+            # stop the robot
+            motionProxy.post.stopMove()
+
+            say("I'm back at the start!")
+        else:
+            say("I didn't find 3 doors!")
+            say(f"I only found {door_count} doors!")
+
+            say("I'm back at the start!")
+    
 
 
 if __name__ == "__main__":

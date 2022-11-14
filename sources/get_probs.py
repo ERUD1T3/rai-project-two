@@ -294,7 +294,6 @@ def generate_cpts(samples):
             d_cpts[f'd{t}|a{t}=2,a{t-1}=0'] = (not_prob_2_0, prob_2_0)
             d_cpts[f'd{t}|a{t}=2,a{t-1}=1'] = (not_prob_2_1, prob_2_1)
             d_cpts[f'd{t}|a{t}=2,a{t-1}=2'] = (not_prob_2_2, prob_2_2)
-    
 
     return z_cpts, a_cpts, d_cpts
 
