@@ -13984,8 +13984,8 @@ To build the Bayesian Network, we have devised the following random variables:</
 <li>$A_t$: action or whether the robot has moved either forward, backward or stayed in place</li>
 <li>$t$: timestep variable.</li>
 </ul>
-<p>From there then follows the Bayesian Network below:</p>
-<h4 id="20-seconds-Time-window-Bayesion-Network">20 seconds Time window Bayesion Network<a class="anchor-link" href="#20-seconds-Time-window-Bayesion-Network">&#182;</a></h4><p><img src="DBN.png" ></p>
+<p>From there then follows the Dynamic Bayesian Network below (up to t=2):</p>
+<p><img src="DBN.png" ></p>
 <p>Based on the Network, we would like to find $P(D_t = true | A_{0:t})$ as the probability that the robot passed by the door given the actions it has taken until the last timestep at $n$. It depends on the actions because, as the robot moves along the ways, it is trying to maintain constant distance from the wall and will adjust it's trajectory to maintain course. If the robot sense 2 major course correction due to a change the measured distance from the wall, then we know, it has passed an opened door.</p>
 <p>To calculate make our conditional propability tables, we collected samples over several runs and collected them into csv files. The probabilities where then found according to the following formulas:</p>
 <h2 id="Appendix">Appendix<a class="anchor-link" href="#Appendix">&#182;</a></h2><ul>
