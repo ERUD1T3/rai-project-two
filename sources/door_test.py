@@ -190,6 +190,12 @@ def main(robotIP):
         speak("I passed three doors")
         time.sleep(10)
         speak("Time to go back")
+
+        endRobotPosition = m.Pose2D(motionProxy.getRobotPosition(False))
+        robotMove = m.pose2DInverse(initRobotPosition)*endRobotPosition
+        x_array.append([robotMove.x, robotMove.y])
+
+        say("I'm back at the start!")
     # stop the robot
     motionProxy.post.stopMove()
 
