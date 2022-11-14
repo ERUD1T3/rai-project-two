@@ -197,7 +197,7 @@ def main(robotIP):
         a_array = []  # actions 
         door_array = []
 
-        while time_now < 100:
+        while time_now < 2:
             # read sonar data
             sonar_readings = read_sonar(20)
             time_now = time.time() - time_start
