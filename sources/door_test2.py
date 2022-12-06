@@ -197,7 +197,7 @@ def main(robotIP):
         a_array = []  # actions 
         door_array = []
 
-        while time_now < 2:
+        while time_now < 200:
             # read sonar data
             sonar_readings = read_sonar(20)
             time_now = time.time() - time_start
@@ -247,14 +247,12 @@ def main(robotIP):
             x_array.append([robotMove.x, robotMove.y])
 
             # stop the robot
-            motionProxy.post.stopMove()
+        motionProxy.post.stopMove()
 
-            say("I'm back at the start!")
-        else:
-            say("I didn't find 3 doors!")
-            say(f"I only found {door_count} doors!")
-
-            say("I'm back at the start!")
+        say("I'm back at the start!")
+    else:
+        say("I didn't find 3 doors!")
+        say(f"I only found {door_count} doors!")
     
 
 
